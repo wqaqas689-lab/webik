@@ -43,17 +43,44 @@ let currentTab = "overall";
 function populateEditDropdowns(players) {
     const names = [...new Set(players.map(p => p.name))].sort();
  
-    ["editPlayerSelect", "removePlayerSelect"].forEach(id => {
+    ["editPlayerSelect", "removePlayerSelect", "retirePlayerSelect"].forEach(id => {
         const sel = document.getElementById(id);
+        if (!sel) return;
         const cur = sel.value;
         sel.innerHTML = `<option value="">— Select Player —</option>`;
         names.forEach(n => {
             const opt = document.createElement("option");
             opt.value = n; opt.textContent = n;
+            // Show retired status in retire dropdown
+            if (id === "retirePlayerSelect") {
+                const isRetired = players.find(p => p.name === n && p.retired);
+                opt.textContent = n + (isRetired ? " (retired)" : "");
+            }
             sel.appendChild(opt);
         });
         if (cur) sel.value = cur;
     });
+}
+ 
+/* ── RETIRE / UNRETIRE ── */
+async function setRetired(retired) {
+    const password = document.getElementById("passwordInput").value;
+    const name = document.getElementById("retirePlayerSelect").value;
+    if (!name) { showMsg2("Select a player", "error"); return; }
+ 
+    const res = await fetch("/api/retire", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-password": password },
+        body: JSON.stringify({ name, retired })
+    });
+ 
+    const data = await res.json();
+    if (!res.ok) {
+        showMsg2(data.error || "Error", "error");
+    } else {
+        showMsg2(`✓ ${name} is now ${retired ? "retired" : "active"}!`, "success");
+        load();
+    }
 }
  
 function onEditPlayerChange() {
@@ -291,9 +318,18 @@ function groupByName(players) {
     const byName = {};
     players.forEach(p => {
         if (!p || !p.name) return;
-        if (!byName[p.name]) byName[p.name] = { name: p.name, points: 0, tiers: [] };
+        if (!byName[p.name]) byName[p.name] = { name: p.name, points: 0, tiers: [], peakTier: null, retired: false };
         byName[p.name].points += (p.points || 0);
         byName[p.name].tiers.push({ tier: p.tier, mode: p.mode });
+        // Peak tier: keep the best one seen
+        if (p.peakTier) {
+            const cur = byName[p.name].peakTier;
+            if (!cur || TIER_ORDER.indexOf(p.peakTier) < TIER_ORDER.indexOf(cur)) {
+                byName[p.name].peakTier = p.peakTier;
+            }
+        }
+        // Retired: if any entry is retired, player is retired
+        if (p.retired) byName[p.name].retired = true;
     });
     return byName;
 }
@@ -329,8 +365,16 @@ function renderOverall(players) {
                 </span>`)
             .join("");
  
+        const peakTag = p.peakTier
+            ? `<span class="peak-tag ${tierClass(p.peakTier)}" title="Peak Tier">⬆ ${p.peakTier.toUpperCase()}</span>`
+            : "";
+ 
+        const retiredBadge = p.retired
+            ? `<span class="retired-badge">RETIRED</span>`
+            : "";
+ 
         const row = document.createElement("div");
-        row.className = `rank-row ${tc}`;
+        row.className = `rank-row ${tc}${p.retired ? " retired" : ""}`;
         row.style.animationDelay = `${i * 35}ms`;
         row.innerHTML = `
             <div class="rank-num ${rc}">${i + 1}</div>
@@ -339,9 +383,12 @@ function renderOverall(players) {
                      src="${skinUrl(p.name)}"
                      alt="${p.name}"
                      onerror="this.src='${avatarUrl(p.name)}'">
-                <span class="player-name">${p.name}</span>
+                <div>
+                    <span class="player-name">${p.name}</span>
+                    <div style="display:flex;gap:5px;align-items:center;margin-top:3px">${peakTag}${retiredBadge}</div>
+                </div>
             </div>
-            <div class="points-badge">${p.points} pts</div>
+            <div class="points-badge">${p.retired ? '<span style="color:var(--muted)">—</span>' : p.points + " pts"}</div>
             <div class="tier-tags">${tierTags || '<span style="color:var(--muted2);font-size:12px">—</span>'}</div>
         `;
  
@@ -427,3 +474,4 @@ async function load() {
 }
  
 load();
+ 
