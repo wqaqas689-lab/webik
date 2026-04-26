@@ -11,11 +11,11 @@ app.use(express.static("public"));
 // ── Tier & mode config ────────────────────────────────────────────────────────
 
 const TIER_POINTS = {
-    ht1: 100, lt1: 90,
-    ht2: 80,  lt2: 70,
-    ht3: 60,  lt3: 50,
-    ht4: 40,  lt4: 30,
-    ht5: 20,  lt5: 10,
+    ht1: 60, lt1: 45,
+    ht2: 30,  lt2: 25,
+    ht3: 10,  lt3: 6,
+    ht4: 4,  lt4: 3,
+    ht5: 2,  lt5: 1,
 };
 
 const TIER_ORDER = ["ht1","lt1","ht2","lt2","ht3","lt3","ht4","lt4","ht5","lt5"];
