@@ -12,15 +12,17 @@ app.use(express.static("public"));
 // ── Tier & mode config ────────────────────────────────────────────────────────
  
 const TIER_POINTS = {
-    ht1: 60, lt1: 45,
-    ht2: 30,  lt2: 20,
-    ht3: 10,  lt3: 6,
-    ht4: 4,  lt4: 3,
-    ht5: 2,  lt5: 1,
+    ht1: 100, lt1: 90,
+    ht2: 80,  lt2: 70,
+    ht3: 60,  lt3: 50,
+    ht4: 40,  lt4: 30,
+    ht5: 20,  lt5: 10,
 };
  
+const TIER_ORDER = ["ht1","lt1","ht2","lt2","ht3","lt3","ht4","lt4","ht5","lt5"];
+ 
 const GAME_MODES = [
-    "spear mace",   // längre fraser före kortare för korrekt matchning
+    "spear mace",
     "dia smp",
     "sword", "mace", "axe", "spear",
     "smp", "nethpot", "dia pot",
@@ -61,6 +63,17 @@ function savePlayers(players) {
         console.error("Kunde inte spara players.json:", err.message);
         throw new Error("Kunde inte spara data");
     }
+}
+ 
+// ── Peak tier helper ──────────────────────────────────────────────────────────
+ 
+function bestTier(a, b) {
+    // Returns whichever tier is higher (lower index in TIER_ORDER = better)
+    const ai = TIER_ORDER.indexOf(a);
+    const bi = TIER_ORDER.indexOf(b);
+    if (ai === -1) return b;
+    if (bi === -1) return a;
+    return ai <= bi ? a : b;
 }
  
 // ── Parsning ──────────────────────────────────────────────────────────────────
@@ -112,7 +125,7 @@ app.post("/api/add", requireAuth, (req, res) => {
         return res.status(500).json({ error: "Kunde inte läsa spelare" });
     }
  
-    // Block if player already has ANY tier for this mode (one tier per mode per player)
+    // Block if player already has ANY tier for this mode
     const existingMode = players.find(
         (p) => p.name === name && p.mode === mode
     );
@@ -120,14 +133,28 @@ app.post("/api/add", requireAuth, (req, res) => {
         return res.status(409).json({ error: `${name} already has a ${mode} tier (${existingMode.tier.toUpperCase()}). Use Change Tier instead.` });
     }
  
+    // Calculate peak tier across all entries for this player
+    const allEntries = players.filter(p => p.name === name);
+    const currentPeak = allEntries.length > 0 ? allEntries[0].peakTier : null;
+    const newPeak = bestTier(currentPeak, tier);
+ 
     const newPlayer = {
         id: Date.now(),
         name,
         tier,
+        peakTier: newPeak,
         mode,
         points: TIER_POINTS[tier],
+        retired: false,
         addedAt: new Date().toISOString(),
     };
+ 
+    // Update peakTier on all existing entries for this player
+    players.forEach(p => {
+        if (p.name === name) {
+            p.peakTier = newPeak;
+        }
+    });
  
     players.push(newPlayer);
  
@@ -159,6 +186,13 @@ app.post("/api/update", requireAuth, (req, res) => {
  
     entry.tier = tier;
     entry.points = TIER_POINTS[tier];
+ 
+    // Recalculate peak tier across all entries for this player
+    const allEntries = players.filter(p => p.name === name);
+    const peak = allEntries.reduce((best, p) => bestTier(best, p.tier), allEntries[0].tier);
+    players.forEach(p => {
+        if (p.name === name) p.peakTier = peak;
+    });
  
     try {
         savePlayers(players);
@@ -192,6 +226,33 @@ app.post("/api/remove-tier", requireAuth, (req, res) => {
     }
  
     res.json({ success: true });
+});
+ 
+// ── Retire / unretire a player ────────────────────────────────────────────────
+ 
+app.post("/api/retire", requireAuth, (req, res) => {
+    const { name, retired } = req.body ?? {};
+    if (!name || typeof retired !== "boolean") {
+        return res.status(400).json({ error: "Missing name or retired status" });
+    }
+ 
+    let players = loadPlayers();
+    const entries = players.filter(p => p.name === name);
+    if (!entries.length) {
+        return res.status(404).json({ error: `Player ${name} not found` });
+    }
+ 
+    players.forEach(p => {
+        if (p.name === name) p.retired = retired;
+    });
+ 
+    try {
+        savePlayers(players);
+    } catch {
+        return res.status(500).json({ error: "Could not save" });
+    }
+ 
+    res.json({ success: true, retired });
 });
  
 app.delete("/api/players/:id", requireAuth, (req, res) => {
