@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tier Rankings</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg: #070508;
+    --bg2: #0e0b12;
+    --bg3: #15111c;
+    --bg4: #1e1828;
+    --border: rgba(255,220,120,0.07);
+    --border2: rgba(255,220,120,0.15);
+    --lamp: #ffd060;
+    --lamp2: #ffb020;
+    --lamp3: #ff8800;
+    --lamp-glow: rgba(255,200,60,0.18);
+    --lamp-glow2: rgba(255,150,20,0.10);
+    --text: #f0e8d8;
+    --muted: #8a7a60;
+    --muted2: #5a4e38;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Crimson Text', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: default;
+}
+
+/* ── CANVAS PARTICLES ── */
+#particleCanvas {
+    position: fixed; inset: 0; z-index: 0;
+    pointer-events: none;
+}
+
+/* ── LAMP GLOW AT TOP ── */
+.lamp-source {
+    position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 280px; z-index: 0;
+    pointer-events: none;
+}
+.lamp-core {
+    position: absolute; top: 52px; left: 50%; transform: translateX(-50%);
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #fff8e0;
+    box-shadow:
+        0 0 6px 3px #fff0a0,
+        0 0 20px 10px #ffd060,
+        0 0 60px 30px rgba(255,190,40,0.6),
+        0 0 120px 60px rgba(255,140,20,0.3),
+        0 0 200px 100px rgba(255,100,10,0.15);
+    animation: lampFlicker 4s ease-in-out infinite;
+}
+.lamp-beam {
+    position: absolute; top: 58px; left: 50%; transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 260px solid transparent;
+    border-right: 260px solid transparent;
+    border-top: 220px solid rgba(255,200,60,0.04);
+    filter: blur(8px);
+    animation: beamPulse 6s ease-in-out infinite;
+}
+.lamp-stem {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 2px; height: 54px;
+    background: linear-gradient(to bottom, rgba(255,220,100,0.4), rgba(255,180,60,0.15));
+}
+.lamp-shade {
+    position: absolute; top: 38px; left: 50%; transform: translateX(-50%);
+    width: 40px; height: 16px;
+    background: linear-gradient(to bottom, #2a2218, #1a1510);
+    border-radius: 4px 4px 0 0;
+    border: 1px solid rgba(255,200,80,0.2);
+    box-shadow: 0 0 10px rgba(255,180,40,0.3);
+}
+
+@keyframes lampFlicker {
+    0%,100% { opacity: 1; transform: translateX(-50%) scale(1); }
+    15%      { opacity: 0.92; transform: translateX(-50%) scale(0.97); }
+    30%      { opacity: 1; transform: translateX(-50%) scale(1.02); }
+    50%      { opacity: 0.95; transform: translateX(-50%) scale(0.99); }
+    70%      { opacity: 1; }
+    85%      { opacity: 0.96; transform: translateX(-50%) scale(1.01); }
+}
+@keyframes beamPulse {
+    0%,100% { opacity: 1; }
+    40%     { opacity: 0.7; }
+    70%     { opacity: 0.9; }
+}
+
+/* ── HEADER ── */
+header {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; gap: 16px;
+    padding: 0 32px; height: 58px;
+    background: rgba(7,5,8,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border2);
+    box-shadow: 0 1px 30px rgba(255,180,40,0.06);
+}
+
+.logo {
+    font-family: 'Cinzel', serif;
+    font-size: 18px; font-weight: 700;
+    color: var(--lamp);
+    letter-spacing: 4px; white-space: nowrap;
+    text-shadow: 0 0 20px rgba(255,200,60,0.5), 0 0 40px rgba(255,150,20,0.3);
+    animation: logoGlow 4s ease-in-out infinite;
+}
+@keyframes logoGlow {
+    0%,100% { text-shadow: 0 0 20px rgba(255,200,60,0.5), 0 0 40px rgba(255,150,20,0.3); }
+    50%      { text-shadow: 0 0 30px rgba(255,210,80,0.7), 0 0 60px rgba(255,160,30,0.4); }
+}
+
+#modeNav { display: flex; gap: 2px; flex: 1; overflow-x: auto; scrollbar-width: none; }
+#modeNav::-webkit-scrollbar { display: none; }
+
+.nav-btn {
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    padding: 5px 14px; border-radius: 4px;
+    font-family: 'Cinzel', serif; font-size: 11px; font-weight: 600;
+    letter-spacing: 1.5px; text-transform: uppercase; white-space: nowrap;
+    transition: all 0.25s; display: flex; align-items: center; gap: 7px;
+    position: relative;
+}
+.nav-btn:hover { color: var(--lamp); background: rgba(255,200,60,0.06); }
+.nav-btn.active {
+    color: var(--lamp);
+    background: rgba(255,200,60,0.08);
+    text-shadow: 0 0 12px rgba(255,200,60,0.4);
+}
+.nav-btn.active::after {
+    content: ''; position: absolute; bottom: -1px; left: 20%; right: 20%; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--lamp), transparent);
+}
+
+.header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+.search-box {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(255,200,60,0.04); border: 1px solid var(--border2);
+    border-radius: 6px; padding: 6px 12px; transition: all 0.2s;
+}
+.search-box:focus-within {
+    border-color: rgba(255,200,60,0.35);
+    box-shadow: 0 0 16px rgba(255,180,40,0.1);
+}
+.search-box input {
+    background: none; border: none; outline: none;
+    color: var(--text); font-size: 13px; font-family: 'Crimson Text', serif; width: 140px;
+}
+.search-box input::placeholder { color: var(--muted2); }
+
+.discord-btn {
+    display: flex; align-items: center; gap: 6px;
+    text-decoration: none; color: var(--muted);
+    font-size: 11px; padding: 6px 12px;
+    border-radius: 5px; border: 1px solid var(--border);
+    background: rgba(88,101,242,0.08);
+    transition: all 0.2s; white-space: nowrap;
+    font-family: 'Cinzel', serif; font-weight: 600; letter-spacing: 1px;
+}
+.discord-btn:hover {
+    color: #7289da; border-color: rgba(88,101,242,0.4);
+    background: rgba(88,101,242,0.15);
+    box-shadow: 0 0 12px rgba(88,101,242,0.2);
+}
+.admin-toggle {
+    cursor: pointer; color: var(--muted); font-size: 11px; padding: 6px 12px;
+    border-radius: 5px; border: 1px solid var(--border);
+    transition: all 0.2s; white-space: nowrap;
+    font-family: 'Cinzel', serif; font-weight: 600; letter-spacing: 1px;
+    background: rgba(255,200,60,0.03);
+}
+.admin-toggle:hover { color: var(--lamp); border-color: var(--border2); box-shadow: 0 0 10px rgba(255,180,40,0.1); }
+
+/* ── ADMIN PANEL ── */
+.admin-panel {
+    position: fixed; top: 58px; right: 0; z-index: 99; width: 310px;
+    background: var(--bg2); border-left: 1px solid var(--border2);
+    border-bottom: 1px solid var(--border2); border-radius: 0 0 0 12px;
+    padding: 18px; animation: slideIn 0.2s ease;
+    box-shadow: -4px 4px 30px rgba(255,180,40,0.08);
+}
+@keyframes slideIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+.admin-panel.hidden { display: none; }
+.admin-inner h3 {
+    font-family: 'Cinzel', serif; font-size: 13px; font-weight: 700;
+    color: var(--lamp); margin-bottom: 14px; letter-spacing: 2px; text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(255,200,60,0.3);
+}
+.admin-inner input {
+    width: 100%; padding: 9px 12px; background: var(--bg3);
+    border: 1px solid var(--border); border-radius: 6px; color: var(--text);
+    font-size: 14px; font-family: 'Crimson Text', serif; margin-bottom: 8px; transition: border-color 0.2s;
+}
+.admin-inner input:focus { outline: none; border-color: rgba(255,200,60,0.4); box-shadow: 0 0 10px rgba(255,180,40,0.1); }
+.admin-inner button {
+    width: 100%; padding: 10px; background: linear-gradient(135deg, var(--lamp2), var(--lamp3));
+    color: #000; border: none; border-radius: 6px;
+    font-family: 'Cinzel', serif; font-size: 13px; font-weight: 700;
+    cursor: pointer; letter-spacing: 2px; transition: opacity 0.2s;
+    box-shadow: 0 0 16px rgba(255,180,40,0.3);
+}
+.admin-inner button:hover { opacity: 0.88; }
+#adminMsg { margin-top: 10px; font-size: 13px; color: var(--muted); }
+#adminMsg.error { color: #f87171; }
+#adminMsg.success { color: #86efac; }
+
+/* ── MAIN ── */
+main { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 80px 24px 40px; }
+
+.tab { display: none; }
+.tab.active { display: block; animation: fadeUp 0.3s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── PAGE HEADER ── */
+.page-header {
+    margin-bottom: 28px; display: flex;
+    align-items: center; justify-content: space-between;
+}
+.page-header-left { display: flex; align-items: center; gap: 14px; }
+.page-header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 38px; font-weight: 700; letter-spacing: 3px;
+    color: var(--lamp);
+    text-shadow: 0 0 30px rgba(255,200,60,0.4), 0 0 60px rgba(255,140,20,0.2);
+}
+.subtitle { color: var(--muted); font-size: 15px; margin-top: 3px; font-style: italic; }
+
+.player-count-badge {
+    background: rgba(255,200,60,0.05); border: 1px solid var(--border2);
+    border-radius: 6px; padding: 8px 18px;
+    font-family: 'Cinzel', serif; font-size: 13px; color: var(--muted); letter-spacing: 1px;
+}
+.player-count-badge span { color: var(--lamp); font-weight: 700; }
+
+/* ── STATS BAR ── */
+.stats-bar { display: flex; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
+.stat-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 20px;
+    display: flex; flex-direction: column; gap: 3px; min-width: 120px;
+    position: relative; overflow: hidden; transition: border-color 0.2s;
+}
+.stat-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,200,60,0.3), transparent);
+}
+.stat-card:hover { border-color: var(--border2); }
+.stat-label { font-family: 'Cinzel', serif; font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+.stat-value { font-family: 'Cinzel', serif; font-size: 22px; font-weight: 700; color: var(--lamp); text-shadow: 0 0 10px rgba(255,200,60,0.3); }
+
+/* ── RANK TABLE ── */
+.rank-table { display: flex; flex-direction: column; gap: 4px; }
+.rank-header {
+    display: grid; grid-template-columns: 52px 1fr 120px 1fr;
+    padding: 6px 20px 12px; color: var(--muted2);
+    font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    border-bottom: 1px solid var(--border); margin-bottom: 4px;
+}
+
+.rank-row {
+    display: grid; grid-template-columns: 52px 1fr 120px 1fr;
+    align-items: center; padding: 11px 20px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; transition: all 0.2s;
+    animation: fadeUp 0.35s ease both;
+    position: relative; overflow: hidden;
+}
+.rank-row::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+    opacity: 0; transition: opacity 0.2s;
+    background: linear-gradient(to bottom, var(--lamp), var(--lamp3));
+}
+.rank-row:hover::before { opacity: 1; }
+.rank-row:hover {
+    background: var(--bg3); border-color: var(--border2);
+    transform: translateX(3px);
+    box-shadow: 0 0 20px rgba(255,180,40,0.07);
+}
+.rank-row.top1 { border-color: rgba(255,215,0,0.25); }
+.rank-row.top2 { border-color: rgba(192,192,192,0.15); }
+.rank-row.top3 { border-color: rgba(205,127,50,0.15); }
+.rank-row.top1::before { background: #ffd700; opacity: 1; }
+.rank-row.top2::before { background: #c0c0c0; opacity: 1; }
+.rank-row.top3::before { background: #cd7f32; opacity: 1; }
+
+/* faint glow on top rows */
+.rank-row.top1 { box-shadow: inset 0 0 40px rgba(255,215,0,0.03); }
+
+.rank-num { font-family: 'Cinzel', serif; font-size: 16px; font-weight: 700; color: var(--muted2); }
+.rank-num.gold   { color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+.rank-num.silver { color: #c0c0c0; text-shadow: 0 0 8px rgba(192,192,192,0.4); }
+.rank-num.bronze { color: #cd7f32; text-shadow: 0 0 8px rgba(205,127,50,0.4); }
+
+.player-info { display: flex; align-items: center; gap: 10px; }
+.player-avatar {
+    width: 36px; height: 36px; border-radius: 5px;
+    image-rendering: pixelated; border: 1px solid rgba(255,200,60,0.15); flex-shrink: 0;
+    box-shadow: 0 0 8px rgba(255,180,40,0.1);
+}
+.player-name { font-family: 'Cinzel', serif; font-size: 15px; font-weight: 600; letter-spacing: 0.5px; }
+.points-badge { font-family: 'Cinzel', serif; font-size: 16px; font-weight: 700; color: var(--lamp); text-shadow: 0 0 8px rgba(255,200,60,0.3); }
+
+/* ── TIER TAGS ── */
+.tier-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.tier-tag {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 7px; border-radius: 3px;
+    font-family: 'Cinzel', serif; font-size: 10px; font-weight: 600; letter-spacing: 0.8px;
+    border: 1px solid transparent; cursor: default; transition: all 0.15s;
+}
+.tier-tag:hover { transform: scale(1.08); filter: brightness(1.2); }
+
+.tier-ht1 { background: rgba(255,215,0,0.12);   color: #ffd700; border-color: rgba(255,215,0,0.3); }
+.tier-lt1 { background: rgba(160,200,255,0.10); color: #a0c8ff; border-color: rgba(160,200,255,0.25); }
+.tier-ht2 { background: rgba(255,180,40,0.10);  color: #ffb828; border-color: rgba(255,180,40,0.25); }
+.tier-lt2 { background: rgba(112,144,208,0.10); color: #7090d0; border-color: rgba(112,144,208,0.25); }
+.tier-ht3 { background: rgba(200,112,48,0.10);  color: #c87030; border-color: rgba(200,112,48,0.25); }
+.tier-lt3 { background: rgba(80,96,152,0.10);   color: #8090c0; border-color: rgba(80,96,152,0.25); }
+.tier-ht4 { background: rgba(128,64,32,0.10);   color: #a06040; border-color: rgba(128,64,32,0.25); }
+.tier-lt4 { background: rgba(64,80,128,0.10);   color: #6070a0; border-color: rgba(64,80,128,0.25); }
+.tier-ht5 { background: rgba(80,48,16,0.10);    color: #805030; border-color: rgba(80,48,16,0.25); }
+.tier-lt5 { background: rgba(48,56,80,0.10);    color: #506070; border-color: rgba(48,56,80,0.25); }
+
+.mode-icon-img { image-rendering: pixelated; display: inline-block; vertical-align: middle; }
+
+/* ── MODE GRID ── */
+.mode-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(260px,1fr)); gap: 8px; }
+.mode-card {
+    display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 6px;
+    transition: all 0.2s; animation: fadeUp 0.35s ease both;
+    position: relative; overflow: hidden;
+}
+.mode-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+    opacity: 0; transition: opacity 0.2s;
+    background: linear-gradient(to bottom, var(--lamp), var(--lamp3));
+}
+.mode-card:hover::before { opacity: 1; }
+.mode-card:hover {
+    background: var(--bg3); border-color: var(--border2);
+    transform: translateX(3px); box-shadow: 0 0 16px rgba(255,180,40,0.06);
+}
+.mode-card.top1::before { background: #ffd700; opacity: 1; }
+.mode-card.top2::before { background: #c0c0c0; opacity: 1; }
+.mode-card.top3::before { background: #cd7f32; opacity: 1; }
+
+.mode-rank { font-family: 'Cinzel', serif; font-size: 14px; font-weight: 700; color: var(--muted2); width: 24px; text-align: center; flex-shrink: 0; }
+.mode-rank.gold   { color: #ffd700; text-shadow: 0 0 8px rgba(255,215,0,0.4); }
+.mode-rank.silver { color: #c0c0c0; }
+.mode-rank.bronze { color: #cd7f32; }
+.mode-card .player-avatar { width: 32px; height: 32px; }
+.mode-card .player-name { font-size: 14px; flex: 1; }
+.mode-card .tier-tag { margin-left: auto; flex-shrink: 0; }
+
+.empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 16px; font-style: italic; }
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: rgba(255,180,40,0.2); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- Particle canvas -->
+<canvas id="particleCanvas"></canvas>
+
+<!-- Lamp at top of page -->
+<div class="lamp-source">
+    <div class="lamp-stem"></div>
+    <div class="lamp-shade"></div>
+    <div class="lamp-core"></div>
+    <div class="lamp-beam"></div>
+</div>
+
+<header>
+    <div class="logo">⚔ TIERS</div>
+    <nav id="modeNav">
+        <button class="nav-btn active" data-tab="overall" onclick="showTab('overall')">
+            🏆 <span>Overall</span>
+        </button>
+    </nav>
+    <div class="header-right">
+        <div class="search-box">
+            <span style="color:var(--muted);font-size:13px">🔍</span>
+            <input type="text" id="searchInput" placeholder="Search player..." oninput="handleSearch(this.value)">
+        </div>
+        <a href="https://discord.gg/MXgm5JFz" target="_blank" class="discord-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.08.114 18.1.137 18.115a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+            Discord
+        </a>
+        <div class="admin-toggle" onclick="toggleAdmin()">🔒 Admin</div>
+    </div>
+</header>
+
+<div id="adminPanel" class="admin-panel hidden">
+    <div class="admin-inner">
+        <h3>Add Player</h3>
+        <input type="password" id="passwordInput" placeholder="Password">
+        <input type="text" id="playerInput"
+            placeholder="name tier mode  (e.g. lampan lt3 sword)"
+            onkeydown="if(event.key==='Enter') addPlayer()">
+        <button onclick="addPlayer()">ADD PLAYER</button>
+        <div id="adminMsg"></div>
+    </div>
+</div>
+
+<main>
+    <div id="tab-overall" class="tab active">
+        <div class="page-header">
+            <div class="page-header-left">
+                <div>
+                    <h1>RANKINGS</h1>
+                    <p class="subtitle">Sorted by total points across all modes</p>
+                </div>
+            </div>
+            <div class="player-count-badge">
+                <span id="totalPlayerCount">0</span> players ranked
+            </div>
+        </div>
+        <div class="stats-bar" id="statsBar"></div>
+        <div class="rank-table">
+            <div class="rank-header">
+                <span>#</span><span>Player</span><span>Points</span><span>Tiers</span>
+            </div>
+            <div id="overallList"></div>
+        </div>
+    </div>
+    <div id="modeTabs"></div>
+</main>
+
+<script>
+/* ── PARTICLE SYSTEM ── */
+const canvas = document.getElementById('particleCanvas');
+const ctx = canvas.getContext('2d');
+
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// Lamp position (center top, just below lamp-core at ~58px)
+const LAMP_X = () => canvas.width / 2;
+const LAMP_Y = 58;
+
+class Particle {
+    constructor() { this.reset(); }
+    reset() {
+        // Spawn near lamp
+        const angle = (Math.random() * 120 - 60) * Math.PI / 180; // cone downward
+        const speed = 0.3 + Math.random() * 1.2;
+        this.x = LAMP_X() + (Math.random() - 0.5) * 10;
+        this.y = LAMP_Y + Math.random() * 20;
+        this.vx = Math.sin(angle) * speed * 0.6;
+        this.vy = speed;
+        this.life = 0;
+        this.maxLife = 120 + Math.random() * 180;
+        this.size = 1 + Math.random() * 2;
+        this.wobble = Math.random() * Math.PI * 2;
+        this.wobbleSpeed = 0.02 + Math.random() * 0.03;
+        // Color: warm amber/gold
+        const hue = 30 + Math.random() * 30;
+        const sat = 80 + Math.random() * 20;
+        this.color = `hsl(${hue},${sat}%,70%)`;
+    }
+    update() {
+        this.life++;
+        this.wobble += this.wobbleSpeed;
+        this.x += this.vx + Math.sin(this.wobble) * 0.3;
+        this.y += this.vy;
+        this.vy *= 0.995; // slight decel
+        this.vx *= 0.998;
+        if (this.life > this.maxLife) this.reset();
+    }
+    draw() {
+        const t = this.life / this.maxLife;
+        // Fade in then out
+        const alpha = t < 0.1 ? t / 0.1 : t > 0.7 ? 1 - (t - 0.7) / 0.3 : 1;
+        ctx.save();
+        ctx.globalAlpha = alpha * 0.55;
+        ctx.fillStyle = this.color;
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size * (1 - t * 0.5), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+// Floating dust motes — slower, larger, drift around whole screen
+class DustMote {
+    constructor() { this.reset(true); }
+    reset(initial) {
+        this.x = initial ? Math.random() * window.innerWidth : LAMP_X() + (Math.random()-0.5)*60;
+        this.y = initial ? Math.random() * window.innerHeight : LAMP_Y + Math.random()*40;
+        this.vx = (Math.random()-0.5) * 0.3;
+        this.vy = 0.1 + Math.random() * 0.5;
+        this.life = initial ? Math.random() * 300 : 0;
+        this.maxLife = 400 + Math.random() * 400;
+        this.size = 0.5 + Math.random() * 1.5;
+        this.alpha = 0.1 + Math.random() * 0.25;
+    }
+    update() {
+        this.life++;
+        this.x += this.vx;
+        this.y += this.vy;
+        if (this.life > this.maxLife || this.y > window.innerHeight) this.reset(false);
+    }
+    draw() {
+        const t = this.life / this.maxLife;
+        const a = t < 0.1 ? t/0.1 : t > 0.8 ? 1-(t-0.8)/0.2 : 1;
+        ctx.save();
+        ctx.globalAlpha = a * this.alpha;
+        ctx.fillStyle = '#ffd060';
+        ctx.shadowColor = '#ffb020';
+        ctx.shadowBlur = 4;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+const particles = Array.from({length: 80}, () => new Particle());
+const dust = Array.from({length: 40}, () => new DustMote());
+
+function animLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => { p.update(); p.draw(); });
+    dust.forEach(d => { d.update(); d.draw(); });
+    requestAnimationFrame(animLoop);
+}
+animLoop();
+</script>
+
+<script src="script.js"></script>
+</body>
+</html>

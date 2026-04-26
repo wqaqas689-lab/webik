@@ -1,0 +1,114 @@
+[
+  {
+    "id": 1777140797081,
+    "name": "lamp",
+    "tier": "lt3",
+    "mode": "mace",
+    "points": 50,
+    "addedAt": "2026-04-25T18:13:17.081Z"
+  },
+  {
+    "id": 1777140819239,
+    "name": "ekopaz",
+    "tier": "lt5",
+    "mode": "mace",
+    "points": 10,
+    "addedAt": "2026-04-25T18:13:39.239Z"
+  },
+  {
+    "id": 1777140838070,
+    "name": "thelampanporte",
+    "tier": "ht1",
+    "mode": "sword",
+    "points": 100,
+    "addedAt": "2026-04-25T18:13:58.070Z"
+  },
+  {
+    "id": 1777140983585,
+    "name": "thelampanporte",
+    "tier": "lt2",
+    "mode": "axe",
+    "points": 70,
+    "addedAt": "2026-04-25T18:16:23.585Z"
+  },
+  {
+    "id": 1777146384968,
+    "name": "lamp",
+    "tier": "lt3",
+    "mode": "smp",
+    "points": 50,
+    "addedAt": "2026-04-25T19:46:24.968Z"
+  },
+  {
+    "id": 1777146393950,
+    "name": "lamp",
+    "tier": "lt3",
+    "mode": "dia smp",
+    "points": 50,
+    "addedAt": "2026-04-25T19:46:33.950Z"
+  },
+  {
+    "id": 1777146405980,
+    "name": "lamp",
+    "tier": "lt3",
+    "mode": "cart",
+    "points": 50,
+    "addedAt": "2026-04-25T19:46:45.980Z"
+  },
+  {
+    "id": 1777146456276,
+    "name": "lamp",
+    "tier": "lt3",
+    "mode": "spear mace",
+    "points": 50,
+    "addedAt": "2026-04-25T19:47:36.276Z"
+  },
+  {
+    "id": 1777146468062,
+    "name": "lamp",
+    "tier": "lt3",
+    "mode": "creeper",
+    "points": 50,
+    "addedAt": "2026-04-25T19:47:48.062Z"
+  },
+  {
+    "id": 1777146477023,
+    "name": "lamp",
+    "tier": "lt3",
+    "mode": "speed",
+    "points": 50,
+    "addedAt": "2026-04-25T19:47:57.023Z"
+  },
+  {
+    "id": 1777146487474,
+    "name": "lamp",
+    "tier": "lt3",
+    "mode": "uhc",
+    "points": 50,
+    "addedAt": "2026-04-25T19:48:07.474Z"
+  },
+  {
+    "id": 1777146610520,
+    "name": "lamp",
+    "tier": "lt3",
+    "mode": "vanilla",
+    "points": 50,
+    "addedAt": "2026-04-25T19:50:10.520Z"
+  },
+  {
+    "id": 1777146625026,
+    "name": "lamp",
+    "tier": "lt3",
+    "mode": "okänd",
+    "points": 50,
+    "addedAt": "2026-04-25T19:50:25.026Z"
+  },
+  {
+    "id": 1777146634764,
+    "name": "lamp",
+    "tier": "lt3",
+    "mode": "dia pot",
+    "points": 50,
+    "addedAt": "2026-04-25T19:50:34.764Z"
+  }
+]
