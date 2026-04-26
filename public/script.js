@@ -1,7 +1,7 @@
 const ADMIN_PASSWORD = "K#9mX$vL2@pQnR7!wZ4&jY";
-
+ 
 const TIER_ORDER = ["ht1","lt1","ht2","lt2","ht3","lt3","ht4","lt4","ht5","lt5"];
-
+ 
 const MODE_ICONS = {
     "sword":      "https://minecraft.wiki/images/Diamond_Sword_JE3_BE3.png",
     "axe":        "https://minecraft.wiki/images/Diamond_Axe_JE3_BE3.png",
@@ -18,7 +18,7 @@ const MODE_ICONS = {
     "nethpot":    "https://minecraft.wiki/images/Splash_Potion_JE2_BE2.png",
     "uhc":        "https://minecraft.wiki/images/Golden_Apple_JE2_BE2.png",
 };
-
+ 
 const MODE_LABELS = {
     "sword":      "Sword",
     "mace":       "Mace",
@@ -35,26 +35,122 @@ const MODE_LABELS = {
     "cart":       "Cart",
     "vanilla":    "Vanilla",
 };
-
+ 
 let allPlayers = [];
 let currentTab = "overall";
-
-/* ── ADMIN ── */
+ 
+/* ── POPULATE EDIT DROPDOWNS ── */
+function populateEditDropdowns(players) {
+    const names = [...new Set(players.map(p => p.name))].sort();
+ 
+    ["editPlayerSelect", "removePlayerSelect"].forEach(id => {
+        const sel = document.getElementById(id);
+        const cur = sel.value;
+        sel.innerHTML = `<option value="">— Select Player —</option>`;
+        names.forEach(n => {
+            const opt = document.createElement("option");
+            opt.value = n; opt.textContent = n;
+            sel.appendChild(opt);
+        });
+        if (cur) sel.value = cur;
+    });
+}
+ 
+function onEditPlayerChange() {
+    const name = document.getElementById("editPlayerSelect").value;
+    const sel = document.getElementById("editModeSelect");
+    sel.innerHTML = `<option value="">— Select Mode —</option>`;
+    if (!name) return;
+    const modes = allPlayers.filter(p => p.name === name && p.mode).map(p => p.mode);
+    [...new Set(modes)].forEach(m => {
+        const opt = document.createElement("option");
+        opt.value = m; opt.textContent = modeLabel(m);
+        sel.appendChild(opt);
+    });
+}
+ 
+function onRemovePlayerChange() {
+    const name = document.getElementById("removePlayerSelect").value;
+    const sel = document.getElementById("removeModeSelect");
+    sel.innerHTML = `<option value="">— Select Mode —</option>`;
+    if (!name) return;
+    const modes = allPlayers.filter(p => p.name === name && p.mode).map(p => p.mode);
+    [...new Set(modes)].forEach(m => {
+        const opt = document.createElement("option");
+        opt.value = m; opt.textContent = modeLabel(m);
+        sel.appendChild(opt);
+    });
+}
+ 
+function showMsg2(text, type) {
+    const msg = document.getElementById("adminMsg2");
+    msg.textContent = text;
+    msg.className = type;
+}
+ 
+/* ── CHANGE TIER ── */
+async function changeTier() {
+    const password = document.getElementById("passwordInput").value;
+    const name     = document.getElementById("editPlayerSelect").value;
+    const mode     = document.getElementById("editModeSelect").value;
+    const tier     = document.getElementById("editTierSelect").value;
+ 
+    if (!name || !mode || !tier) { showMsg2("Select player, mode and tier", "error"); return; }
+ 
+    const res = await fetch("/api/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-password": password },
+        body: JSON.stringify({ name, mode, tier })
+    });
+ 
+    const data = await res.json();
+    if (!res.ok) {
+        showMsg2(data.error || "Error", "error");
+    } else {
+        showMsg2(`✓ ${name}'s ${modeLabel(mode)} tier changed to ${tier.toUpperCase()}!`, "success");
+        load();
+    }
+}
+ 
+/* ── REMOVE TIER ── */
+async function removeTier() {
+    const password = document.getElementById("passwordInput").value;
+    const name     = document.getElementById("removePlayerSelect").value;
+    const mode     = document.getElementById("removeModeSelect").value;
+ 
+    if (!name || !mode) { showMsg2("Select player and mode", "error"); return; }
+ 
+    const res = await fetch("/api/remove-tier", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-password": password },
+        body: JSON.stringify({ name, mode })
+    });
+ 
+    const data = await res.json();
+    if (!res.ok) {
+        showMsg2(data.error || "Error", "error");
+    } else {
+        showMsg2(`✓ Removed ${modeLabel(mode)} tier from ${name}!`, "success");
+        load();
+    }
+}
+ 
+ 
 function toggleAdmin() {
     document.getElementById("adminPanel").classList.toggle("hidden");
 }
-
+ 
 async function addPlayer() {
     const password = document.getElementById("passwordInput").value;
     const text = document.getElementById("playerInput").value.trim();
     if (!text) { showMsg("Enter player info", "error"); return; }
-
+ 
     const res = await fetch("/api/add", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-password": password },
         body: JSON.stringify({ text })
     });
-
+ 
     const data = await res.json();
     if (!res.ok) {
         showMsg(data.error || "Error", "error");
@@ -64,13 +160,13 @@ async function addPlayer() {
         load();
     }
 }
-
+ 
 function showMsg(text, type) {
     const msg = document.getElementById("adminMsg");
     msg.textContent = text;
     msg.className = type;
 }
-
+ 
 /* ── NAV ── */
 function showTab(id) {
     document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
@@ -81,7 +177,7 @@ function showTab(id) {
     if (btn) btn.classList.add("active");
     currentTab = id;
 }
-
+ 
 /* ── SEARCH ── */
 function handleSearch(query) {
     const q = query.toLowerCase().trim();
@@ -90,24 +186,24 @@ function handleSearch(query) {
         row.style.display = (!q || name.includes(q)) ? "" : "none";
     });
 }
-
+ 
 /* ── HELPERS ── */
 function tierClass(tier) { return tier ? "tier-" + tier.toLowerCase() : ""; }
-
+ 
 function rankClass(i) {
     if (i === 0) return "gold";
     if (i === 1) return "silver";
     if (i === 2) return "bronze";
     return "";
 }
-
+ 
 function topClass(i) {
     if (i === 0) return "top1";
     if (i === 1) return "top2";
     if (i === 2) return "top3";
     return "";
 }
-
+ 
 /* Full body skin */
 function skinUrl(name) {
     return `https://mc-heads.net/body/${encodeURIComponent(name)}/100`;
@@ -116,17 +212,17 @@ function skinUrl(name) {
 function avatarUrl(name) {
     return `https://mc-heads.net/avatar/${encodeURIComponent(name)}/40`;
 }
-
+ 
 function modeIconImg(mode, size = 24) {
     const src = MODE_ICONS[mode];
     if (!src) return `<span style="font-size:${Math.round(size*0.7)}px;opacity:0.5">?</span>`;
     return `<img class="mode-icon-img" src="${src}" width="${size}" height="${size}" alt="${mode}" onerror="this.style.display='none'">`;
 }
-
+ 
 function modeLabel(mode) {
     return MODE_LABELS[mode] || (mode ? mode.charAt(0).toUpperCase() + mode.slice(1) : "Unknown");
 }
-
+ 
 /* ── SPARKLES for top 3 ── */
 function addSparkles(row, rank) {
     // rank 0 = gold (most), 1 = silver (medium), 2 = bronze (subtle)
@@ -138,7 +234,7 @@ function addSparkles(row, rank) {
     };
     const n = counts[rank];
     const cols = colors[rank];
-
+ 
     for (let i = 0; i < n; i++) {
         const s = document.createElement('span');
         s.className = 'spark';
@@ -159,7 +255,7 @@ function addSparkles(row, rank) {
         row.appendChild(s);
     }
 }
-
+ 
 /* ── STATS BAR ── */
 function renderStatsBar(players) {
     const bar = document.getElementById("statsBar");
@@ -168,7 +264,7 @@ function renderStatsBar(players) {
     const sorted = Object.values(byName).sort((a, b) => b.points - a.points);
     const modes = [...new Set(players.map(p => p.mode))].filter(Boolean);
     const ht1Count = players.filter(p => p.tier === "ht1").length;
-
+ 
     bar.innerHTML = `
         <div class="stat-card">
             <div class="stat-label">Players</div>
@@ -189,7 +285,7 @@ function renderStatsBar(players) {
         </div>` : ""}
     `;
 }
-
+ 
 /* ── GROUP BY NAME ── */
 function groupByName(players) {
     const byName = {};
@@ -201,28 +297,28 @@ function groupByName(players) {
     });
     return byName;
 }
-
+ 
 /* ── OVERALL ── */
 function renderOverall(players) {
     const list = document.getElementById("overallList");
     list.innerHTML = "";
-
+ 
     const byName = groupByName(players);
     const sorted = Object.values(byName).sort((a, b) => b.points - a.points);
-
+ 
     const countEl = document.getElementById("totalPlayerCount");
     if (countEl) countEl.textContent = sorted.length;
     renderStatsBar(players);
-
+ 
     if (!sorted.length) {
         list.innerHTML = `<div class="empty">No players yet.</div>`;
         return;
     }
-
+ 
     sorted.forEach((p, i) => {
         const rc = rankClass(i);
         const tc = topClass(i);
-
+ 
         const tierTags = p.tiers
             .filter(t => t.tier)
             .sort((a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier))
@@ -232,7 +328,7 @@ function renderOverall(players) {
                     ${t.tier.toUpperCase()}
                 </span>`)
             .join("");
-
+ 
         const row = document.createElement("div");
         row.className = `rank-row ${tc}`;
         row.style.animationDelay = `${i * 35}ms`;
@@ -248,44 +344,44 @@ function renderOverall(players) {
             <div class="points-badge">${p.points} pts</div>
             <div class="tier-tags">${tierTags || '<span style="color:var(--muted2);font-size:12px">—</span>'}</div>
         `;
-
+ 
         // Add sparkles for top 3
         if (i < 3) addSparkles(row, i);
-
+ 
         list.appendChild(row);
     });
 }
-
+ 
 /* ── MODE TABS ── */
 function renderModes(players) {
     const nav = document.getElementById("modeNav");
     const modeTabs = document.getElementById("modeTabs");
-
+ 
     nav.querySelectorAll("[data-tab]").forEach(b => {
         if (b.dataset.tab !== "overall") b.remove();
     });
     modeTabs.innerHTML = "";
-
+ 
     const modes = [...new Set(players.map(p => p.mode))].filter(m => m && m !== "okänd" && m !== "unknown");
-
+ 
     modes.forEach(mode => {
         const label = modeLabel(mode);
-
+ 
         const btn = document.createElement("button");
         btn.className = "nav-btn";
         btn.dataset.tab = "mode-" + mode;
         btn.innerHTML = `${modeIconImg(mode, 18)}<span>${label}</span>`;
         btn.onclick = () => showTab("mode-" + mode);
         nav.appendChild(btn);
-
+ 
         const tab = document.createElement("div");
         tab.className = "tab";
         tab.id = "tab-mode-" + mode;
-
+ 
         const modePlayers = players
             .filter(p => p.mode === mode && p.tier)
             .sort((a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier));
-
+ 
         const cards = modePlayers.map((p, i) => {
             const rc = rankClass(i);
             const tc = topClass(i);
@@ -298,7 +394,7 @@ function renderModes(players) {
                 </div>
             `;
         }).join("");
-
+ 
         tab.innerHTML = `
             <div class="page-header">
                 <div class="page-header-left">
@@ -312,11 +408,11 @@ function renderModes(players) {
             </div>
             <div class="mode-grid">${cards || '<div class="empty">No players ranked yet.</div>'}</div>
         `;
-
+ 
         modeTabs.appendChild(tab);
     });
 }
-
+ 
 /* ── LOAD ── */
 async function load() {
     try {
@@ -324,9 +420,10 @@ async function load() {
         allPlayers = await res.json();
         renderOverall(allPlayers);
         renderModes(allPlayers);
+        populateEditDropdowns(allPlayers);
     } catch (e) {
         console.error("Could not load players:", e);
     }
 }
-
+ 
 load();
