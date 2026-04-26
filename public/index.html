@@ -23,9 +23,9 @@
     --muted: #8a7a60;
     --muted2: #5a4e38;
 }
-
+ 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-
+ 
 body {
     background: var(--bg);
     color: var(--text);
@@ -34,13 +34,13 @@ body {
     overflow-x: hidden;
     cursor: default;
 }
-
+ 
 /* ── CANVAS PARTICLES ── */
 #particleCanvas {
     position: fixed; inset: 0; z-index: 0;
     pointer-events: none;
 }
-
+ 
 /* ── LAMP GLOW AT TOP ── */
 .lamp-source {
     position: fixed; top: 0; left: 50%; transform: translateX(-50%);
@@ -82,7 +82,7 @@ body {
     border: 1px solid rgba(255,200,80,0.2);
     box-shadow: 0 0 10px rgba(255,180,40,0.3);
 }
-
+ 
 @keyframes lampFlicker {
     0%,100% { opacity: 1; transform: translateX(-50%) scale(1); }
     15%      { opacity: 0.92; transform: translateX(-50%) scale(0.97); }
@@ -96,7 +96,7 @@ body {
     40%     { opacity: 0.7; }
     70%     { opacity: 0.9; }
 }
-
+ 
 /* ── HEADER ── */
 header {
     position: sticky; top: 0; z-index: 100;
@@ -107,7 +107,7 @@ header {
     border-bottom: 1px solid var(--border2);
     box-shadow: 0 1px 30px rgba(255,180,40,0.06);
 }
-
+ 
 .logo {
     font-family: 'Cinzel', serif;
     font-size: 18px; font-weight: 700;
@@ -120,10 +120,10 @@ header {
     0%,100% { text-shadow: 0 0 20px rgba(255,200,60,0.5), 0 0 40px rgba(255,150,20,0.3); }
     50%      { text-shadow: 0 0 30px rgba(255,210,80,0.7), 0 0 60px rgba(255,160,30,0.4); }
 }
-
+ 
 #modeNav { display: flex; gap: 2px; flex: 1; overflow-x: auto; scrollbar-width: none; }
 #modeNav::-webkit-scrollbar { display: none; }
-
+ 
 .nav-btn {
     background: none; border: none; color: var(--muted); cursor: pointer;
     padding: 5px 14px; border-radius: 4px;
@@ -142,9 +142,9 @@ header {
     content: ''; position: absolute; bottom: -1px; left: 20%; right: 20%; height: 1px;
     background: linear-gradient(90deg, transparent, var(--lamp), transparent);
 }
-
+ 
 .header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-
+ 
 .search-box {
     display: flex; align-items: center; gap: 8px;
     background: rgba(255,200,60,0.04); border: 1px solid var(--border2);
@@ -159,7 +159,7 @@ header {
     color: var(--text); font-size: 13px; font-family: 'Crimson Text', serif; width: 140px;
 }
 .search-box input::placeholder { color: var(--muted2); }
-
+ 
 .discord-btn {
     display: flex; align-items: center; gap: 6px;
     text-decoration: none; color: var(--muted);
@@ -182,7 +182,7 @@ header {
     background: rgba(255,200,60,0.03);
 }
 .admin-toggle:hover { color: var(--lamp); border-color: var(--border2); box-shadow: 0 0 10px rgba(255,180,40,0.1); }
-
+ 
 /* ── ADMIN PANEL ── */
 .admin-panel {
     position: fixed; top: 58px; right: 0; z-index: 99; width: 310px;
@@ -212,17 +212,36 @@ header {
     box-shadow: 0 0 16px rgba(255,180,40,0.3);
 }
 .admin-inner button:hover { opacity: 0.88; }
+.admin-divider {
+    height: 1px; background: var(--border2); margin: 16px 0;
+}
+.admin-inner select {
+    width: 100%; padding: 9px 12px; background: var(--bg3);
+    border: 1px solid var(--border); border-radius: 6px; color: var(--text);
+    font-size: 13px; font-family: 'Cinzel', serif; margin-bottom: 8px;
+    transition: border-color 0.2s; cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a7a60' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+}
+.admin-inner select:focus { outline: none; border-color: rgba(255,200,60,0.4); box-shadow: 0 0 10px rgba(255,180,40,0.1); }
+.admin-inner select option { background: var(--bg3); }
+.btn-danger {
+    background: linear-gradient(135deg, #c0392b, #922b21) !important;
+    box-shadow: 0 0 16px rgba(192,57,43,0.3) !important;
+    color: #fff !important;
+}
+.btn-danger:hover { opacity: 0.88; }
 #adminMsg { margin-top: 10px; font-size: 13px; color: var(--muted); }
 #adminMsg.error { color: #f87171; }
 #adminMsg.success { color: #86efac; }
-
+ 
 /* ── MAIN ── */
 main { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 80px 24px 40px; }
-
+ 
 .tab { display: none; }
 .tab.active { display: block; animation: fadeUp 0.3s ease; }
 @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-
+ 
 /* ── PAGE HEADER ── */
 .page-header {
     margin-bottom: 28px; display: flex;
@@ -236,14 +255,14 @@ main { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; paddin
     text-shadow: 0 0 30px rgba(255,200,60,0.4), 0 0 60px rgba(255,140,20,0.2);
 }
 .subtitle { color: var(--muted); font-size: 15px; margin-top: 3px; font-style: italic; }
-
+ 
 .player-count-badge {
     background: rgba(255,200,60,0.05); border: 1px solid var(--border2);
     border-radius: 6px; padding: 8px 18px;
     font-family: 'Cinzel', serif; font-size: 13px; color: var(--muted); letter-spacing: 1px;
 }
 .player-count-badge span { color: var(--lamp); font-weight: 700; }
-
+ 
 /* ── STATS BAR ── */
 .stats-bar { display: flex; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
 .stat-card {
@@ -259,7 +278,7 @@ main { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; paddin
 .stat-card:hover { border-color: var(--border2); }
 .stat-label { font-family: 'Cinzel', serif; font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
 .stat-value { font-family: 'Cinzel', serif; font-size: 22px; font-weight: 700; color: var(--lamp); text-shadow: 0 0 10px rgba(255,200,60,0.3); }
-
+ 
 /* ── RANK TABLE ── */
 .rank-table { display: flex; flex-direction: column; gap: 4px; }
 .rank-header {
@@ -268,7 +287,7 @@ main { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; paddin
     font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
     border-bottom: 1px solid var(--border); margin-bottom: 4px;
 }
-
+ 
 .rank-row {
     display: grid; grid-template-columns: 52px 1fr 120px 1fr;
     align-items: center; padding: 11px 20px;
@@ -294,15 +313,15 @@ main { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; paddin
 .rank-row.top1::before { background: #ffd700; opacity: 1; }
 .rank-row.top2::before { background: #c0c0c0; opacity: 1; }
 .rank-row.top3::before { background: #cd7f32; opacity: 1; }
-
+ 
 /* faint glow on top rows */
 .rank-row.top1 { box-shadow: inset 0 0 40px rgba(255,215,0,0.03); }
-
+ 
 .rank-num { font-family: 'Cinzel', serif; font-size: 16px; font-weight: 700; color: var(--muted2); }
 .rank-num.gold   { color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
 .rank-num.silver { color: #c0c0c0; text-shadow: 0 0 8px rgba(192,192,192,0.4); }
 .rank-num.bronze { color: #cd7f32; text-shadow: 0 0 8px rgba(205,127,50,0.4); }
-
+ 
 .player-info { display: flex; align-items: center; gap: 10px; }
 .player-avatar {
     width: 36px; height: 36px; border-radius: 5px;
@@ -311,7 +330,7 @@ main { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; paddin
 }
 .player-name { font-family: 'Cinzel', serif; font-size: 15px; font-weight: 600; letter-spacing: 0.5px; }
 .points-badge { font-family: 'Cinzel', serif; font-size: 16px; font-weight: 700; color: var(--lamp); text-shadow: 0 0 8px rgba(255,200,60,0.3); }
-
+ 
 /* ── TIER TAGS ── */
 .tier-tags { display: flex; flex-wrap: wrap; gap: 4px; }
 .tier-tag {
@@ -321,7 +340,7 @@ main { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; paddin
     border: 1px solid transparent; cursor: default; transition: all 0.15s;
 }
 .tier-tag:hover { transform: scale(1.08); filter: brightness(1.2); }
-
+ 
 .tier-ht1 { background: rgba(255,215,0,0.12);   color: #ffd700; border-color: rgba(255,215,0,0.3); }
 .tier-lt1 { background: rgba(160,200,255,0.10); color: #a0c8ff; border-color: rgba(160,200,255,0.25); }
 .tier-ht2 { background: rgba(255,180,40,0.10);  color: #ffb828; border-color: rgba(255,180,40,0.25); }
@@ -332,9 +351,9 @@ main { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; paddin
 .tier-lt4 { background: rgba(64,80,128,0.10);   color: #6070a0; border-color: rgba(64,80,128,0.25); }
 .tier-ht5 { background: rgba(80,48,16,0.10);    color: #805030; border-color: rgba(80,48,16,0.25); }
 .tier-lt5 { background: rgba(48,56,80,0.10);    color: #506070; border-color: rgba(48,56,80,0.25); }
-
+ 
 .mode-icon-img { image-rendering: pixelated; display: inline-block; vertical-align: middle; }
-
+ 
 /* ── MODE GRID ── */
 .mode-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(260px,1fr)); gap: 8px; }
 .mode-card {
@@ -356,7 +375,7 @@ main { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; paddin
 .mode-card.top1::before { background: #ffd700; opacity: 1; }
 .mode-card.top2::before { background: #c0c0c0; opacity: 1; }
 .mode-card.top3::before { background: #cd7f32; opacity: 1; }
-
+ 
 .mode-rank { font-family: 'Cinzel', serif; font-size: 14px; font-weight: 700; color: var(--muted2); width: 24px; text-align: center; flex-shrink: 0; }
 .mode-rank.gold   { color: #ffd700; text-shadow: 0 0 8px rgba(255,215,0,0.4); }
 .mode-rank.silver { color: #c0c0c0; }
@@ -364,19 +383,19 @@ main { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; paddin
 .mode-card .player-avatar { width: 32px; height: 32px; }
 .mode-card .player-name { font-size: 14px; flex: 1; }
 .mode-card .tier-tag { margin-left: auto; flex-shrink: 0; }
-
+ 
 .empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 16px; font-style: italic; }
-
+ 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: rgba(255,180,40,0.2); border-radius: 2px; }
 </style>
 </head>
 <body>
-
+ 
 <!-- Particle canvas -->
 <canvas id="particleCanvas"></canvas>
-
+ 
 <!-- Lamp at top of page -->
 <div class="lamp-source">
     <div class="lamp-stem"></div>
@@ -384,7 +403,7 @@ main { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; paddin
     <div class="lamp-core"></div>
     <div class="lamp-beam"></div>
 </div>
-
+ 
 <header>
     <div class="logo">⚔ TIERS</div>
     <nav id="modeNav">
@@ -404,7 +423,7 @@ main { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; paddin
         <div class="admin-toggle" onclick="toggleAdmin()">🔒 Admin</div>
     </div>
 </header>
-
+ 
 <div id="adminPanel" class="admin-panel hidden">
     <div class="admin-inner">
         <h3>Add Player</h3>
@@ -414,9 +433,38 @@ main { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; paddin
             onkeydown="if(event.key==='Enter') addPlayer()">
         <button onclick="addPlayer()">ADD PLAYER</button>
         <div id="adminMsg"></div>
+ 
+        <div class="admin-divider"></div>
+ 
+        <h3>Change Tier</h3>
+        <select id="editPlayerSelect" onchange="onEditPlayerChange()"><option value="">— Select Player —</option></select>
+        <select id="editModeSelect"><option value="">— Select Mode —</option></select>
+        <select id="editTierSelect">
+            <option value="">— New Tier —</option>
+            <option value="ht1">HT1</option>
+            <option value="lt1">LT1</option>
+            <option value="ht2">HT2</option>
+            <option value="lt2">LT2</option>
+            <option value="ht3">HT3</option>
+            <option value="lt3">LT3</option>
+            <option value="ht4">HT4</option>
+            <option value="lt4">LT4</option>
+            <option value="ht5">HT5</option>
+            <option value="lt5">LT5</option>
+        </select>
+        <button onclick="changeTier()">CHANGE TIER</button>
+ 
+        <div class="admin-divider"></div>
+ 
+        <h3>Remove Tier</h3>
+        <select id="removePlayerSelect" onchange="onRemovePlayerChange()"><option value="">— Select Player —</option></select>
+        <select id="removeModeSelect"><option value="">— Select Mode —</option></select>
+        <button class="btn-danger" onclick="removeTier()">REMOVE TIER</button>
+ 
+        <div id="adminMsg2"></div>
     </div>
 </div>
-
+ 
 <main>
     <div id="tab-overall" class="tab active">
         <div class="page-header">
@@ -440,23 +488,23 @@ main { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; paddin
     </div>
     <div id="modeTabs"></div>
 </main>
-
+ 
 <script>
 /* ── PARTICLE SYSTEM ── */
 const canvas = document.getElementById('particleCanvas');
 const ctx = canvas.getContext('2d');
-
+ 
 function resize() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 }
 resize();
 window.addEventListener('resize', resize);
-
+ 
 // Lamp position (center top, just below lamp-core at ~58px)
 const LAMP_X = () => canvas.width / 2;
 const LAMP_Y = 58;
-
+ 
 class Particle {
     constructor() { this.reset(); }
     reset() {
@@ -501,7 +549,7 @@ class Particle {
         ctx.restore();
     }
 }
-
+ 
 // Floating dust motes — slower, larger, drift around whole screen
 class DustMote {
     constructor() { this.reset(true); }
@@ -535,10 +583,10 @@ class DustMote {
         ctx.restore();
     }
 }
-
+ 
 const particles = Array.from({length: 80}, () => new Particle());
 const dust = Array.from({length: 40}, () => new DustMote());
-
+ 
 function animLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     particles.forEach(p => { p.update(); p.draw(); });
@@ -547,7 +595,7 @@ function animLoop() {
 }
 animLoop();
 </script>
-
+ 
 <script src="script.js"></script>
 </body>
 </html>
