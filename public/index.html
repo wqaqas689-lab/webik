@@ -386,6 +386,30 @@ main { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; paddin
  
 .empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 16px; font-style: italic; }
  
+/* ── PEAK TIER TAG ── */
+.peak-tag {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 1px 6px; border-radius: 3px;
+    font-family: 'Cinzel', serif; font-size: 9px; font-weight: 600; letter-spacing: 0.8px;
+    border: 1px solid transparent; opacity: 0.75;
+}
+ 
+/* ── RETIRED ── */
+.retired-badge {
+    display: inline-flex; align-items: center;
+    padding: 1px 6px; border-radius: 3px;
+    font-family: 'Cinzel', serif; font-size: 9px; font-weight: 700; letter-spacing: 1px;
+    background: rgba(150,150,150,0.1); color: #888; border: 1px solid rgba(150,150,150,0.2);
+}
+.rank-row.retired {
+    opacity: 0.5;
+    filter: grayscale(0.6);
+}
+.rank-row.retired .player-name {
+    text-decoration: line-through;
+    color: var(--muted);
+}
+ 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: rgba(255,180,40,0.2); border-radius: 2px; }
@@ -460,6 +484,15 @@ main { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; paddin
         <select id="removePlayerSelect" onchange="onRemovePlayerChange()"><option value="">— Select Player —</option></select>
         <select id="removeModeSelect"><option value="">— Select Mode —</option></select>
         <button class="btn-danger" onclick="removeTier()">REMOVE TIER</button>
+ 
+        <div class="admin-divider"></div>
+ 
+        <h3>Retire / Unretire</h3>
+        <select id="retirePlayerSelect"><option value="">— Select Player —</option></select>
+        <div style="display:flex;gap:8px">
+            <button style="flex:1" onclick="setRetired(true)">RETIRE</button>
+            <button style="flex:1;background:linear-gradient(135deg,#1a6b3a,#0f4a28)!important;box-shadow:0 0 16px rgba(26,107,58,0.3)!important" onclick="setRetired(false)">UNRETIRE</button>
+        </div>
  
         <div id="adminMsg2"></div>
     </div>
